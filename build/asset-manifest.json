@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/NetworkOptimizationFinalProject/static/css/main.1ad314e5.css",
+    "main.js": "/NetworkOptimizationFinalProject/static/js/main.a951df9c.js",
+    "static/js/453.bb828c5d.chunk.js": "/NetworkOptimizationFinalProject/static/js/453.bb828c5d.chunk.js",
+    "index.html": "/NetworkOptimizationFinalProject/index.html",
+    "main.1ad314e5.css.map": "/NetworkOptimizationFinalProject/static/css/main.1ad314e5.css.map",
+    "main.a951df9c.js.map": "/NetworkOptimizationFinalProject/static/js/main.a951df9c.js.map",
+    "453.bb828c5d.chunk.js.map": "/NetworkOptimizationFinalProject/static/js/453.bb828c5d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1ad314e5.css",
+    "static/js/main.a951df9c.js"
+  ]
+}
