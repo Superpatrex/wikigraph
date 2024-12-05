@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { NODES, EDGES } from './constants.js';
 import './App.css';
 
-// Generate a large number of nodes and links
 const generateGraphData = () => {
   const nodes = NODES;
   const links = EDGES;
@@ -44,12 +43,12 @@ const App = () => {
   const getParititionString = (partition) => {
     switch (partition) {
       case 0: return "Nixon Era";
-      case 1: return "Clinton Era";
-      case 2: return "Carter/Reagan/H. W. Bush Era";
-      case 3: return "Bush Era";
-      case 4: return "Obama Era";
-      case 5: return "Trump Era";
-      case 6: return "Biden Era";
+      case 6: return "H. W. Bush/Clinton Era";
+      case 4: return "Carter/Reagan Era";
+      case 5: return "Bush Era";
+      case 1: return "Obama Era";
+      case 2: return "Trump Era";
+      case 3: return "Biden Era";
       default: return "Unknown Era";
     }
   };
@@ -77,15 +76,12 @@ const App = () => {
     const minSize = 0; 
     const maxSize = 300;
     
-    // Color based on partition
     const color = interpolateColor(node.partition);
     
-    // Unique geometry for President
     const geometry = !node.is_president
       ? new THREE.SphereGeometry(Math.log2(node.size))
       : new THREE.SphereGeometry(Math.log2(node.size) * 2);
     
-    // Unique material for President
     const material =  new THREE.MeshBasicMaterial({ color });
     
     return new THREE.Mesh(geometry, material);
@@ -135,10 +131,14 @@ const App = () => {
             <em>ID:</em> ${node.id}<br/>
             <em>Partition:</em> ${getParititionString(node.partition)}<br/>
             <em>Total Edges:</em> ${node.num_edges}<br/>
-            <em>Rank:</em> ${node.rank}<br/>
             <em>PageRank:</em> ${node.page_rank}<br/>
-            <em>Hubs:</em> ${node.hubs}<br/>
-            <em>Authorities:</em> ${node.authorities}<br/>
+            <em>PageRank Rank:</em> ${node.rank}<br/>
+            <em>Betweenness Centrality:</em> ${node.betweenness_centrality}<br/>
+            <em>Betweenness Centrality Rank:</em> ${node.betweenness_centrality_rank}<br/>
+            <em>Closeness Centrality:</em> ${node.closeness_centrality}<br/>
+            <em>Closeness Centrality Rank:</em> ${node.closeness_centrality_rank}<br/>
+            <em>Eigenvector Centrality:</em> ${node.eigen_centrality}<br/>
+            <em>Eigenvector Centrality Rank:</em> ${node.eigen_centrality_rank}<br/>
           </div>`}
         linkWidth={1}
         linkColor={linkColor}
@@ -155,7 +155,7 @@ const App = () => {
           bottom: "20px",
           left: "20px",
           background: "rgba(0, 0, 0, 0.9)",
-          padding: "20px", // Increased padding
+          padding: "20px",
           border: "1px solid #ccc",
           borderRadius: "5px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
@@ -165,12 +165,12 @@ const App = () => {
       >
         <strong>Legend</strong><br/>
         <span style={{ color: "#FFB3B3" }}>■</span> Nixon Era<br/>
-        <span style={{ color: "#FFFFB3" }}>■</span> Carter/Reagan/H. W. Bush Era<br/>
-        <span style={{ color: "#B3B3FF" }}>■</span> Clinton Era<br/>
+        <span style={{ color: "#FFB3DE" }}>■</span> Carter/Reagan Era<br/>
+        <span style={{ color: "#FFFFB3" }}>■</span> H. W. Bush/Clinton Era<br/>
         <span style={{ color: "#B3FFB3" }}>■</span> Bush Era<br/>
-        <span style={{ color: "#FFD9B3" }}>■</span> Obama Era<br/>
-        <span style={{ color: "#B3FFFF" }}>■</span> Biden Era<br/>
-        <span style={{ color: "#FFB3DE" }}>■</span> Trump Era<br/>
+        <span style={{ color: "#B3FFFF" }}>■</span> Obama Era<br/>
+        <span style={{ color: "#FFD9B3" }}>■</span> Biden Era<br/>
+        <span style={{ color: "#B3B3FF" }}>■</span> Trump Era<br/>
       </div>
     </div>
     
