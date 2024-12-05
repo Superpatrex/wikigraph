@@ -5,6 +5,7 @@
 In order to run the python web scrapper, you need to each install the required libraries. You can do this by running the following command:
 
 ```bash
+cd webscrapper
 pip install -r requirements.txt
 ```
 
@@ -31,7 +32,9 @@ This will run the web scrapper and generate a files within the `output` director
 
 ## [wikigraph website](https://superpatrex.github.io/wikigraph/)
 
-The website can be viewed by simply clicking on the following link: [wikigraph](https://superpatrex.github.io/wikigraph/)
+The website can be viewed by simply clicking on the following link that is already hosted: [wikigraph](https://superpatrex.github.io/wikigraph/)
+
+`NOTE:` The website is hosted on github pages and may take a few seconds to load.
 
 If you would like to run the website locally, you can do so by doing the following:
 

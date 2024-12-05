@@ -4,19 +4,23 @@ import * as THREE from 'three';
 import { NODES, EDGES } from './constants.js';
 import './App.css';
 
+// Method that generates the graph data
 const generateGraphData = () => {
   const nodes = NODES;
   const links = EDGES;
   return { nodes, links };
 };
 
+// Main App component
 const App = () => {
   const tooltipRef = useRef();
   const graphRef = useRef();
   const [hoveredNode, setHoveredNode] = useState(null);
 
+  // Generate the graph data
   const graphData = useMemo(() => generateGraphData(), []);
 
+  // Method that handles the hover event on a node
   const handleNodeHover = (node) => {
     setHoveredNode(node);
     if (node) {
@@ -40,6 +44,7 @@ const App = () => {
     }
   };
 
+  // Method that returns the partition string based on the partition number
   const getParititionString = (partition) => {
     switch (partition) {
       case 0: return "Nixon Era";
@@ -53,12 +58,14 @@ const App = () => {
     }
   };
 
+  // Method that opens the node's URL in a new tab
   const handleNodeClick = useCallback((node) => {
     if (node && node.url) {
       window.open(node.url, '_blank');
     }
   }, []);
 
+  // Method that interpolates the color based on the partition of the node for the legend
   const interpolateColor = (partition) => {
     switch (partition) {
       case 0: return 0xFFB3B3;
@@ -72,21 +79,26 @@ const App = () => {
     }
   };
 
+  // Method that creates the 3D object for each node
   const nodeThreeObject = useCallback((node) => {
     const minSize = 0; 
     const maxSize = 300;
     
     const color = interpolateColor(node.partition);
     
+    // Create a sphere geometry for the node and set the size based on the number of edges
     const geometry = !node.is_president
       ? new THREE.SphereGeometry(Math.log2(node.size))
       : new THREE.SphereGeometry(Math.log2(node.size) * 2);
     
+    // Create a material for the node
     const material =  new THREE.MeshBasicMaterial({ color });
     
+    // Return the mesh object
     return new THREE.Mesh(geometry, material);
   }, []);
 
+  // Method that changes the color of the link based on the hovered node
   const linkColor = useCallback((link) => 
   {
     if (hoveredNode && (link.source.id === hoveredNode.id || link.target.id === hoveredNode.id)) 
@@ -96,12 +108,14 @@ const App = () => {
     return 'rgba(255, 255, 255, 0.5)';
   }, [hoveredNode]);
 
+  // Method that zooms the graph to fit the screen
   useEffect(() => {
     if (graphRef.current) {
       graphRef.current.zoomToFit(400);
     }
   }, []);
 
+  // Render the graph
   return (
     <div style={{ position: "relative" }}>
       <div
@@ -119,7 +133,6 @@ const App = () => {
           display: "none",
         }}
       ></div>
-
       <ForceGraph3D
         ref={graphRef}
         graphData={graphData}
@@ -163,7 +176,7 @@ const App = () => {
           color: "white",
         }}
       >
-        <strong>Legend</strong><br/>
+        <strong>Legend</strong><br/> 
         <span style={{ color: "#FFB3B3" }}>■</span> Nixon Era<br/>
         <span style={{ color: "#FFB3DE" }}>■</span> Carter/Reagan Era<br/>
         <span style={{ color: "#FFFFB3" }}>■</span> H. W. Bush/Clinton Era<br/>
@@ -177,4 +190,5 @@ const App = () => {
   );
 };
 
+// Export the App component
 export default React.memo(App);

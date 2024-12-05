@@ -4,6 +4,7 @@ import urllib.parse
 import networkx as nx
 import community as community_louvain
 
+# List of states in the United States that are used to filter out links
 LOWER_CASE_STATES = [
     'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 
     'delaware', 'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 
@@ -15,36 +16,39 @@ LOWER_CASE_STATES = [
     'wisconsin', 'wyoming'
 ]
 
+# List of words that are used to filter out links
 REMOVED_WORDS = [
-'covid-19_pandemic_in',
-',_',
-'election',
-'presidential',
-'list_of',
-'presidency',
-'primary',
-'congressional_district',
-'district_election',
-'mayoral_election',
-'gubernatorial_election',
-'united_states_congress',
-'governor',
-'national_convention',
-'electoral_history',
-'state_of_the_union_address',
-'bibliography',
-'inauguration',
-'special_election',
-'electoral_college',
-'administration'
+    'covid-19_pandemic_in',
+    ',_',
+    'election',
+    'presidential',
+    'list_of',
+    'presidency',
+    'primary',
+    'congressional_district',
+    'district_election',
+    'mayoral_election',
+    'gubernatorial_election',
+    'united_states_congress',
+    'governor',
+    'national_convention',
+    'electoral_history',
+    'state_of_the_union_address',
+    'bibliography',
+    'inauguration',
+    'special_election',
+    'electoral_college',
+    'administration'
 ]
 
+# List of presidents to identify them in the graph
 PRESIDENTS = [
     'Donald Trump', 'Joe Biden', 'Richard Nixon', 'Gerald Ford', 
     'Jimmy Carter', 'Ronald Reagan', 'George H. W. Bush', 
     'Bill Clinton', 'George W. Bush', 'Barack Obama'
 ]
 
+# List of Wikipedia URLs for the United States presidential elections
 WIKIPEDIA_URLS = [
     'https://en.wikipedia.org/wiki/1972_United_States_presidential_election',
     'https://en.wikipedia.org/wiki/1976_United_States_presidential_election',
@@ -60,14 +64,17 @@ WIKIPEDIA_URLS = [
     'https://en.wikipedia.org/wiki/2016_United_States_presidential_election',
     'https://en.wikipedia.org/wiki/2020_United_States_presidential_election',
     'https://en.wikipedia.org/wiki/2024_United_States_presidential_election'
-    ]
+]
 
+# Function to get the embedded links from a Wikipedia URL
 def get_embedded_links(url):
     response = requests.get(url)
     response.raise_for_status()
 
+    # Parse the HTML content of the Wikipedia page
     soup = BeautifulSoup(response.text, 'html.parser')
 
+    # Get the links from each of the Wikipedia pages
     links = set()
     for a_tag in soup.find_all('a', href=True):
         href = a_tag['href']
@@ -77,6 +84,7 @@ def get_embedded_links(url):
 
     return list(links)
 
+# Function to get the embedded links from multiple Wikipedia URLs
 def get_links_from_multiple_articles(urls):
     all_links = []
     for url in urls:
@@ -84,17 +92,21 @@ def get_links_from_multiple_articles(urls):
         all_links.append((url, links))
     return all_links
 
+# Function to convert a Wikipedia URL to text
 def convert_wikipedia_url_to_text(url):
     return urllib.parse.unquote(url).split('/wiki/')[1].replace('_', ' ')
 
+# Function to run the web scrapper for the United States presidential elections
 def run_presidential_election_web_scrapper():
     adjacency_list = {url: [] for url in WIKIPEDIA_URLS}
 
+    # Get the embedded links from the Wikipedia URLs
     url_to_id = {}
     unique_id_counter = 0
     adjacency_list = {}
     incoming_edges_count = {}
 
+    # Get the embedded links from the Wikipedia URLs
     for url in WIKIPEDIA_URLS:
         if url not in url_to_id:
             url_to_id[url] = unique_id_counter
@@ -112,31 +124,32 @@ def run_presidential_election_web_scrapper():
                 incoming_edges_count[link] = 0
             incoming_edges_count[link] += 1
 
+    # Create a graph from the adjacency list
     G = nx.Graph()
     for node, neighbors in adjacency_list.items():
         for neighbor in neighbors:
             G.add_edge(node, neighbor)
 
+    # Calculate the metrics for each node in the graph for partitioning, ranking, and centrality
     partition = community_louvain.best_partition(G)
     pagerank_scores = nx.pagerank(G, alpha=0.85)
-    #hubs, authorities = nx.hits(G, max_iter=100, tol=1.0e-8)
     betweenness_centrality = nx.betweenness_centrality(G)
     closeness_centrality = nx.closeness_centrality(G)
     eigenvector_centrality = nx.eigenvector_centrality(G, max_iter=1000, tol=1e-4)
 
+    # Sort the nodes based on their scores for each metric
     sorted_urls = sorted(pagerank_scores, key=pagerank_scores.get, reverse=True)
-    #sorted_hubs = sorted(hubs, key=hubs.get, reverse=True)
-    #sorted_authorities = sorted(authorities, key=authorities.get, reverse=True)
     sorted_betweenness_centrality = sorted(betweenness_centrality, key=betweenness_centrality.get, reverse=True)
     sorted_closeness_centrality = sorted(closeness_centrality, key=closeness_centrality.get, reverse=True)
     sorted_eigen_centralities = sorted(eigenvector_centrality, key=eigenvector_centrality.get, reverse=True)
+
+    # Rank the nodes based on their scores for each metric
     url_rank = {url: rank + 1 for rank, url in enumerate(sorted_urls)}
-    #hubs_rank = {url: rank + 1 for rank, url in enumerate(sorted_hubs)}
-    #authorities_rank = {url: rank + 1 for rank, url in enumerate(sorted_authorities)}
     betweenness_centralities_rank = {url: rank + 1 for rank, url in enumerate(sorted_betweenness_centrality)}
     closeness_centralities_rank = {url: rank + 1 for rank, url in enumerate(sorted_closeness_centrality)}
     eigen_centralities_rank = {url: rank + 1 for rank, url in enumerate(sorted_eigen_centralities)}
 
+    # Write the nodes to the file for the graph with their metrics and rankings
     written_ids = set()
     with open("output/constants.js", "w") as f:
         f.write('export const NODES = [')
@@ -152,6 +165,7 @@ def run_presidential_election_web_scrapper():
                 written_ids.add(url_to_id[url])
         f.write('];')
 
+    # Write the edges to the file for the graph
     with open("output/constants.js", "a") as f:
         f.write('export const EDGES = [')
         for url, links in adjacency_list.items():
@@ -159,17 +173,10 @@ def run_presidential_election_web_scrapper():
                 f.write(f"{{source: {url_to_id[url]}, target: {url_to_id[link]}}},\n")
         f.write('];')
 
+    # Write the rankings to the file for page rank, betweenness centrality, closeness centrality, and eigen centrality
     with open("output/nodes_page_rank.txt", "w") as f:
         for url in sorted_urls:
             f.write(f"{convert_wikipedia_url_to_text(url)}: {pagerank_scores[url]}\n")
-
-    # with open("output/nodes_hubs_rank.txt", "w") as f:
-    #     for url in sorted_hubs:
-    #         f.write(f"{convert_wikipedia_url_to_text(url)}: {hubs[url]}\n")
-
-    # with open("output/nodes_authorities_rank.txt", "w") as f:
-    #     for url in sorted_authorities:
-    #         f.write(f"{convert_wikipedia_url_to_text(url)}: {authorities[url]}\n")
 
     with open("output/nodes_betweenness_centrality_rank.txt", "w") as f:
         for url in sorted_betweenness_centrality:
@@ -186,11 +193,13 @@ def run_presidential_election_web_scrapper():
 
     print("Adjacency list, nodes, and links created and written to files")
 
+# Function to read the URLs from a file
 def read_urls_from_file(file_path):
     with open(file_path, 'r') as f:
         urls = [line.strip() for line in f if line.strip()]
     return urls
 
+# Function to write the adjacency list to a file
 def write_adjacency_list_to_file(adjacency_list, file_path):
     with open(file_path, 'w') as f:
         for url, links in adjacency_list.items():
@@ -198,6 +207,7 @@ def write_adjacency_list_to_file(adjacency_list, file_path):
             for link in links:
                 f.write(f"  {link}\n")
 
+# Function to run the web scrapper
 def run_web_scraper(input_file, output_file):
     urls = read_urls_from_file(input_file)
     url_set = set(urls)
@@ -212,4 +222,5 @@ def run_web_scraper(input_file, output_file):
 
     write_adjacency_list_to_file(adjacency_list, output_file)
 
+# Run the web scrapper for the United States presidential elections
 run_presidential_election_web_scrapper()
